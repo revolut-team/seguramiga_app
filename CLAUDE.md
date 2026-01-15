@@ -41,13 +41,16 @@ flutter build web          # Web
 lib/
 ├── main.dart              # App entry point
 ├── core/                  # Core utilities
-│   ├── constants/         # App-wide constants (spacing, sizes, timeouts)
+│   ├── constants/         # App-wide constants (spacing, sizes, timeouts, Venezuela data)
 │   ├── theme/             # Design system (colors, typography, theme)
 │   └── widgets/           # Reusable UI components
 ├── features/              # Feature modules
 │   ├── auth/              # Authentication (phone + PIN login)
 │   ├── home/              # Dashboard
 │   ├── profile/           # User profile
+│   ├── registration/      # User registration flow (NEW)
+│   │   ├── screens/       # 7 registration and payment screens
+│   │   └── widgets/       # Registration-specific widgets
 │   ├── services/          # Insurance services (8 sub-features)
 │   ├── emergency/         # Emergency services
 │   ├── benefits/          # Plan benefits
@@ -55,8 +58,8 @@ lib/
 └── shared/                # Cross-feature shared code
     ├── navigation/        # GoRouter configuration (app_router.dart)
     ├── widgets/           # Shell widgets (main_shell.dart)
-    ├── models/            # Data models (to be implemented)
-    ├── providers/         # State management (to be implemented)
+    ├── models/            # Data models (insurance, registration, payment)
+    ├── providers/         # State management (Provider installed, not integrated)
     └── services/          # API/business services (to be implemented)
 ```
 
@@ -73,6 +76,8 @@ lib/
 
 Routes defined in `shared/navigation/app_router.dart`:
 - Auth: `/login`, `/pin`, `/recover-pin` (no shell)
+- Registration: `/register/personal`, `/register/contact`, `/register/address`, `/register/pin-setup` (no shell)
+- Payment: `/plan-selection`, `/payment-checkout`, `/payment-success` (no shell) - ⚠️ PENDING IMPLEMENTATION
 - Main (with bottom nav shell): `/home`, `/services`, `/activity`, `/profile`
 - Services: `/telemedicine`, `/pharmacy`, `/appointments`, `/directory`, `/exams`, `/reimbursements`, `/authorizations`, `/claims`
 - Other: `/emergency`, `/benefits`, `/notifications`
@@ -91,6 +96,165 @@ Import all via `core/widgets/widgets.dart` barrel file.
 ## Design System Constants
 
 Located in `core/constants/app_constants.dart`:
-- Spacing: `AppSpacing.xs` (12), `AppSpacing.sm` (16), `AppSpacing.md` (24), etc.
-- Border radius: `AppRadius.sm` (8), `AppRadius.md` (12), `AppRadius.lg` (16)
-- Icon sizes: `AppIconSize.sm` (16), `AppIconSize.md` (24), `AppIconSize.lg` (32)
+- Spacing: `AppConstants.spacingXs` (12), `AppConstants.spacingSm` (16), `AppConstants.spacingMd` (24), `AppConstants.spacingLg` (32), `AppConstants.spacingXl` (40), `AppConstants.spacingXxl` (48)
+- Border radius: `AppConstants.radiusSm` (8), `AppConstants.radiusMd` (12), `AppConstants.radiusLg` (16)
+- Icon sizes: `AppConstants.iconSm` (16), `AppConstants.iconMd` (24), `AppConstants.iconLg` (32)
+
+Located in `core/constants/venezuela_data.dart`:
+- `VenezuelaStates.states` - List of 24 Venezuelan states
+- `VenezuelaPhoneCodes.mobileCodes` - Mobile operator codes (0412, 0414, 0416, 0424, 0426)
+- `VenezuelaPhoneCodes.landlineCodes` - Landline area codes (0212, 0241, 0243, etc.)
+
+## Current Project Status
+
+### ✅ Completed Features
+
+**Registration Flow (Phase 1-3):**
+- Personal information screen with document validation
+- Contact information screen with phone/email validation
+- Address information screen with Venezuelan states
+- PIN setup screen with security validation
+- Progress indicator widget for multi-step forms
+- Document input field for Venezuelan IDs
+- Date picker field with age validation
+
+**Models:**
+- `InsurancePlan` - Insurance plan data structure
+- `RegistrationData` - User registration data model
+- `PaymentDetails` - Payment transaction model
+
+**Navigation:**
+- Login screen has registration link
+- Registration flow integrated (4 screens)
+
+### 🚧 In Progress / Pending
+
+**Payment Flow (Phase 4-5):**
+- Plan selection screen - PENDING
+- Payment checkout screen - PENDING
+- Payment success screen - PENDING
+- Coverage item widget - PENDING
+- Plan comparison card widget - PENDING
+
+**Integration:**
+- Add payment routes to app_router.dart - PENDING
+- Update UserInsuranceModel after payment - PENDING
+
+**For detailed status, see PLAN.md file**
+
+## Common Patterns & Best Practices
+
+### Widget Lifecycle Management
+
+**IMPORTANT:** Always protect state updates during navigation and disposal:
+
+```dart
+// Check mounted before setState
+if (mounted) {
+  setState(() {
+    // state updates
+  });
+}
+
+// Use navigation flag to prevent updates during navigation
+bool _isNavigating = false;
+
+// Set flag before navigation
+setState(() {
+  _isNavigating = true;
+});
+
+// Check flag in callbacks
+onChanged: (value) {
+  if (mounted && !_isNavigating) {
+    setState(() {
+      // safe to update
+    });
+  }
+}
+
+// Safe disposal with try-catch
+@override
+void dispose() {
+  try {
+    _controller.dispose();
+  } catch (e) {
+    // Ignore disposal errors
+  }
+  super.dispose();
+}
+```
+
+### Form Validation
+
+- Use `GlobalKey<FormState>` with `Form` widget
+- Validate in real-time with `onChanged` for better UX
+- Use `TextFormField` with `validator` parameter
+- Clear errors when user starts typing
+
+### Navigation Best Practices
+
+- Use `context.push()` for forward navigation
+- Use `context.go()` for replacing entire stack
+- Use `context.pushReplacement()` to replace current route
+- Pass data between screens using `extra` parameter
+- Always check `mounted` before navigating in async functions
+
+### Asset Management
+
+**SVG Images:**
+- Use `flutter_svg` package for SVG rendering
+- Store SVGs in `assets/images/`
+- If SVG doesn't render correctly (colors missing), create a clean version without complex filters
+- Example: `logo_horizontal_clean.svg` was created to fix color rendering issues
+
+## Known Issues & Solutions
+
+### Issue: TextEditingController disposed error
+**Problem:** `FlutterError (A TextEditingController was used after being disposed)`
+
+**Solution:**
+1. Add `_isNavigating` flag to track navigation state
+2. Disable input fields when navigating: `enabled: !_isNavigating`
+3. Clear controllers before navigation: `_controller.clear()`
+4. Check `mounted && !_isNavigating` in all callbacks
+5. Wrap dispose() in try-catch blocks
+
+**Example:** See `lib/features/registration/screens/pin_setup_screen.dart:38-52` and `:117-128`
+
+### Issue: SVG not showing colors
+**Problem:** Complex SVG filters may not render correctly in Flutter
+
+**Solution:**
+- Create a simplified version without filter effects
+- Remove `<filter>` and `<feOffset>` tags
+- Keep only basic color definitions in `<style>`
+- Example: `assets/images/logo_horizontal_clean.svg`
+
+## Venezuelan-Specific Features
+
+The app includes Venezuela-specific constants and validations:
+
+- **States:** 24 states + Distrito Capital
+- **Phone codes:** Mobile (0412, 0414, 0416, 0424, 0426) and landline codes
+- **Document types:** V (Venezuelan), E (Foreign), J (Legal entity), P (Passport)
+- **Currency:** Bolívares (Bs.) with USD conversion mock
+
+## Dependencies
+
+Key packages used:
+- `go_router: ^13.0.1` - Navigation
+- `provider: ^6.1.2` - State management (installed, not yet integrated)
+- `flutter_svg: ^2.0.10` - SVG rendering
+- `local_auth: ^2.2.0` - Biometric authentication
+- `pin_code_fields: ^8.0.1` - PIN input UI
+- `intl: ^0.19.0` - Internationalization
+- `qr_flutter: ^4.1.0` - QR code generation
+- `share_plus: ^7.2.2` - Share functionality
+- `mobile_scanner: ^3.5.5` - QR code scanning
+
+## Project Documentation
+
+For more details on implementation plans and progress:
+- **PLAN.md** - Detailed implementation plan with current status and next steps
+- **CLAUDE.md** - This file, general project guidance for Claude Code
