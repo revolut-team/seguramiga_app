@@ -43,24 +43,25 @@ lib/
 ├── core/                  # Core utilities
 │   ├── constants/         # App-wide constants (spacing, sizes, timeouts, Venezuela data)
 │   ├── theme/             # Design system (colors, typography, theme)
-│   └── widgets/           # Reusable UI components
+│   └── widgets/           # Reusable UI components (10 widgets)
 ├── features/              # Feature modules
 │   ├── auth/              # Authentication (phone + PIN login)
-│   ├── home/              # Dashboard
-│   ├── profile/           # User profile
-│   ├── registration/      # User registration flow (NEW)
-│   │   ├── screens/       # 7 registration and payment screens
-│   │   └── widgets/       # Registration-specific widgets
-│   ├── services/          # Insurance services (8 sub-features)
+│   ├── home/              # Dashboard with insurance card, services grid
+│   ├── profile/           # User profile with plan info
+│   ├── registration/      # User registration & payment flow
+│   │   ├── screens/       # 7 screens (4 registration + 3 payment)
+│   │   └── widgets/       # Form widgets (progress, document, date picker, plan cards)
+│   ├── insurance/         # Insurance details & QR scanning
+│   │   └── screens/       # Insurance details, QR scanner, scan result
+│   ├── services/          # Insurance services (8 sub-features + pharmacy payment)
 │   ├── emergency/         # Emergency services
 │   ├── benefits/          # Plan benefits
 │   └── notifications/     # Notification center
 └── shared/                # Cross-feature shared code
     ├── navigation/        # GoRouter configuration (app_router.dart)
     ├── widgets/           # Shell widgets (main_shell.dart)
-    ├── models/            # Data models (insurance, registration, payment)
-    ├── providers/         # State management (Provider installed, not integrated)
-    └── services/          # API/business services (to be implemented)
+    ├── models/            # Data models (insurance, registration, payment, user)
+    └── services/          # Business services (qr_service.dart)
 ```
 
 ## Key Technical Decisions
@@ -77,9 +78,12 @@ lib/
 Routes defined in `shared/navigation/app_router.dart`:
 - Auth: `/login`, `/pin`, `/recover-pin` (no shell)
 - Registration: `/register/personal`, `/register/contact`, `/register/address`, `/register/pin-setup` (no shell)
-- Payment: `/plan-selection`, `/payment-checkout`, `/payment-success` (no shell) - ⚠️ PENDING IMPLEMENTATION
+- Payment: `/plan-selection`, `/payment-checkout`, `/payment-success` (no shell)
 - Main (with bottom nav shell): `/home`, `/services`, `/activity`, `/profile`
 - Services: `/telemedicine`, `/pharmacy`, `/appointments`, `/directory`, `/exams`, `/reimbursements`, `/authorizations`, `/claims`
+- Pharmacy Payment: `/pharmacy/payment-methods`, `/pharmacy/payment-process`, `/pharmacy/payment-success`
+- Insurance: `/insurance-details`, `/qr-scanner`, `/qr-result`
+- Profile Screens: `/plan-details`, `/personal-data`, `/dependents`, `/history`, `/payment-methods`, `/digital-card`, `/certificates`, `/notification-settings`, `/security-settings`, `/support`, `/privacy`
 - Other: `/emergency`, `/benefits`, `/notifications`
 
 ## Reusable Components
@@ -87,11 +91,22 @@ Routes defined in `shared/navigation/app_router.dart`:
 Located in `core/widgets/`:
 - `CustomButton` - Multi-type button (primary, secondary, outline, text, emergency)
 - `CustomCard`, `ServiceCard`, `InfoCard` - Card variants
+- `CustomAppBar` - Custom app bar with consistent styling
 - `EmergencyButton` - Emergency action button
 - `LoadingOverlay` - Loading state overlay
 - `StatusBadge` - Status indicators
+- `QuickActionButton` - Quick action buttons for home screen
+- `SectionHeader` - Section headers with title and optional action
 
-Import all via `core/widgets/widgets.dart` barrel file.
+Located in `features/registration/widgets/`:
+- `ProgressIndicator` - Multi-step form progress indicator
+- `DocumentInputField` - Venezuelan ID document input
+- `DatePickerField` - Date picker with age validation
+- `FormFieldWrapper` - Consistent form field styling
+- `CoverageItem` - Insurance coverage item display
+- `PlanComparisonCard` - Plan comparison card with features
+
+Import core widgets via `core/widgets/widgets.dart` barrel file.
 
 ## Design System Constants
 
@@ -109,7 +124,7 @@ Located in `core/constants/venezuela_data.dart`:
 
 ### ✅ Completed Features
 
-**Registration Flow (Phase 1-3):**
+**Registration Flow:**
 - Personal information screen with document validation
 - Contact information screen with phone/email validation
 - Address information screen with Venezuelan states
@@ -118,29 +133,44 @@ Located in `core/constants/venezuela_data.dart`:
 - Document input field for Venezuelan IDs
 - Date picker field with age validation
 
+**Payment Flow:**
+- Plan selection screen with 3 plans (Básico, Estándar, Premium)
+- Payment checkout screen with plan summary and terms
+- Payment success screen with order confirmation
+- Coverage item widget
+- Plan comparison card widget
+- All payment routes integrated in app_router.dart
+
+**Insurance Feature:**
+- Insurance details screen
+- QR scanner screen (using mobile_scanner)
+- QR scan result screen
+- QR service for code generation/parsing
+
+**Pharmacy Feature:**
+- Pharmacy screen with medication catalog
+- Payment methods selection screen
+- Payment process screen
+- Payment success screen
+
 **Models:**
 - `InsurancePlan` - Insurance plan data structure
 - `RegistrationData` - User registration data model
 - `PaymentDetails` - Payment transaction model
+- `UserInsuranceModel` - User's active insurance data
 
-**Navigation:**
-- Login screen has registration link
-- Registration flow integrated (4 screens)
+**Profile Screens (stub implementations):**
+- Plan details, Personal data, Dependents, History
+- Payment methods, Digital card, Certificates
+- Notification settings, Security settings, Support, Privacy
 
-### 🚧 In Progress / Pending
+### 🚧 Pending / Future Work
 
-**Payment Flow (Phase 4-5):**
-- Plan selection screen - PENDING
-- Payment checkout screen - PENDING
-- Payment success screen - PENDING
-- Coverage item widget - PENDING
-- Plan comparison card widget - PENDING
-
-**Integration:**
-- Add payment routes to app_router.dart - PENDING
-- Update UserInsuranceModel after payment - PENDING
-
-**For detailed status, see PLAN.md file**
+- Provider state management integration
+- Backend API integration
+- Complete profile screen implementations (currently stubs)
+- Push notifications
+- Biometric authentication integration
 
 ## Common Patterns & Best Practices
 
@@ -243,15 +273,22 @@ The app includes Venezuela-specific constants and validations:
 ## Dependencies
 
 Key packages used:
-- `go_router: ^13.0.1` - Navigation
-- `provider: ^6.1.2` - State management (installed, not yet integrated)
-- `flutter_svg: ^2.0.10` - SVG rendering
-- `local_auth: ^2.2.0` - Biometric authentication
+- `go_router: ^13.0.0` - Navigation
+- `provider: ^6.1.1` - State management (installed, not yet integrated)
+- `flutter_svg: ^2.0.9` - SVG rendering
+- `local_auth: ^2.1.8` - Biometric authentication
 - `pin_code_fields: ^8.0.1` - PIN input UI
 - `intl: ^0.19.0` - Internationalization
 - `qr_flutter: ^4.1.0` - QR code generation
 - `share_plus: ^7.2.2` - Share functionality
 - `mobile_scanner: ^3.5.5` - QR code scanning
+- `google_fonts: ^6.1.0` - Custom fonts (Poppins, Inter)
+- `flutter_animate: ^4.3.0` - Animations
+- `cached_network_image: ^3.3.1` - Image caching
+- `shimmer: ^3.0.0` - Loading shimmer effects
+- `percent_indicator: ^4.2.3` - Progress indicators
+- `url_launcher: ^6.2.2` - External URL launching
+- `image_picker: ^1.0.7` - Image selection
 
 ## Project Documentation
 

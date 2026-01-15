@@ -29,20 +29,33 @@
 - ✅ Modificado `lib/shared/navigation/app_router.dart` - Rutas de registro agregadas
 - ✅ Creado `assets/images/logo_horizontal_clean.svg` - Logo con colores correctos
 
-### 🚧 Pendiente
-
 **Phase 4 - Plan Selection Widgets & Screen:**
-- ⏳ `lib/features/registration/widgets/coverage_item.dart`
-- ⏳ `lib/features/registration/widgets/plan_comparison_card.dart`
-- ⏳ `lib/features/registration/screens/plan_selection_screen.dart`
+- ✅ `lib/features/registration/widgets/coverage_item.dart`
+- ✅ `lib/features/registration/widgets/plan_comparison_card.dart`
+- ✅ `lib/features/registration/screens/plan_selection_screen.dart`
 
 **Phase 5 - Payment Flow:**
-- ⏳ `lib/features/registration/screens/payment_checkout_screen.dart`
-- ⏳ `lib/features/registration/screens/payment_success_screen.dart`
+- ✅ `lib/features/registration/screens/payment_checkout_screen.dart`
+- ✅ `lib/features/registration/screens/payment_success_screen.dart`
 
-**Phase 6 - Integration (Falta):**
-- ⏳ Agregar rutas `/plan-selection`, `/payment-checkout`, `/payment-success` a `app_router.dart`
-- ⏳ Actualizar `lib/shared/models/user_insurance_model.dart` mock con datos de pago
+**Phase 6 - Integration:**
+- ✅ Rutas `/plan-selection`, `/payment-checkout`, `/payment-success` agregadas a `app_router.dart`
+- ✅ `lib/shared/models/user_insurance_model.dart` disponible
+
+**Features Adicionales Implementadas:**
+- ✅ Insurance details screen con QR scanner
+- ✅ Pharmacy payment flow (3 screens)
+- ✅ Profile screens (stubs) - 11 pantallas
+- ✅ QR service para generación/parsing
+
+### 🚧 Pendiente
+
+**Próximas mejoras:**
+- ⏳ Implementar pantallas de perfil completas (actualmente son stubs)
+- ⏳ Integrar Provider para state management
+- ⏳ Conectar con backend API
+- ⏳ Implementar autenticación biométrica
+- ⏳ Push notifications
 
 ---
 
@@ -72,104 +85,51 @@
 Flujo de Registro (4 pantallas): ✅ COMPLETO
 /register/personal → /register/contact → /register/address → /register/pin-setup
 
-Flujo de Contratación (3 pantallas): ⏳ PENDIENTE
+Flujo de Contratación (3 pantallas): ✅ COMPLETO
 /plan-selection → /payment-checkout → /payment-success
+
+Flujo de Farmacia (4 pantallas): ✅ COMPLETO
+/pharmacy → /pharmacy/payment-methods → /pharmacy/payment-process → /pharmacy/payment-success
+
+Flujo de Seguro/QR: ✅ COMPLETO
+/insurance-details → /qr-scanner → /qr-result
 
 Integración:
 ✅ Login screen tiene link "Crear cuenta"
 ✅ Al completar PIN setup → navega a selección de plan
-⏳ Después de pago exitoso → navega a /home con plan activo
+✅ Después de pago exitoso → navega a /home con plan activo
 ```
 
 ---
 
-## Próximos Pasos para Tu Compañero
+## Próximos Pasos
 
-### 1. Continuar con Phase 4 - Plan Selection
+### 1. Implementar Pantallas de Perfil
 
-Crear los siguientes archivos:
+Las siguientes pantallas están como stubs en `app_router.dart` y necesitan implementación completa:
+- `PlanDetailsScreen` - Detalles del plan contratado
+- `PersonalDataScreen` - Edición de datos personales
+- `DependentsScreen` - Gestión de dependientes/beneficiarios
+- `HistoryScreen` - Historial de uso de servicios
+- `PaymentMethodsScreen` - Gestión de métodos de pago
+- `DigitalCardScreen` - Carnet digital con QR
+- `CertificatesScreen` - Certificados de cobertura
+- `NotificationSettingsScreen` - Configuración de notificaciones
+- `SecuritySettingsScreen` - Configuración de seguridad y PIN
+- `SupportScreen` - Ayuda y soporte
+- `PrivacyScreen` - Política de privacidad
 
-**`lib/features/registration/widgets/coverage_item.dart`**
-- Widget simple que muestra un ítem de cobertura
-- Row con ícono circular + nombre + límite
-- Usar estilos de InfoCard
+### 2. Integrar State Management
 
-**`lib/features/registration/widgets/plan_comparison_card.dart`**
-- Tarjeta vertical para mostrar un plan
-- Badge "Recomendado" condicional
-- Precio destacado (numberLarge style)
-- Lista de features con checkmarks
-- CustomButton "Seleccionar este plan"
-- Border highlight si está seleccionado
-- Toggle mensual/anual
+- Migrar de StatefulWidget a Provider
+- Crear providers para: User, Insurance, Cart, Auth
+- Implementar persistencia local
 
-**`lib/features/registration/screens/plan_selection_screen.dart`**
-- Mostrar 3 planes: Básico, Estándar (recomendado), Premium
-- Cada plan en una PlanComparisonCard
-- State: `_selectedPlan` y `_isAnnual`
-- Al seleccionar → push `/payment-checkout` con plan en extra
+### 3. Backend Integration
 
-### 2. Datos de los Planes (Mock)
-
-```dart
-Plan Básico (Bs. 250/mes = ~$7.50):
-- Consultas médicas ilimitadas
-- Telemedicina 24/7
-- Farmacia con 20% descuento
-- Exámenes básicos
-- Red nacional limitada
-
-Plan Estándar (Bs. 500/mes = ~$15) [RECOMENDADO]:
-- Todo lo del básico +
-- Red nacional completa
-- Descuento farmacia 40%
-- Exámenes especializados
-- Atención prioritaria
-- Reembolsos hasta Bs. 3,000
-
-Plan Premium (Bs. 850/mes = ~$25):
-- Todo lo del estándar +
-- Red internacional
-- Descuento farmacia 60%
-- Todos los exámenes incluidos
-- Sin copagos
-- Reembolsos hasta Bs. 10,000
-- Servicio VIP
-```
-
-### 3. Phase 5 - Payment Flow
-
-Crear:
-- `payment_checkout_screen.dart` - Resumen del plan + datos personales + términos
-- `payment_success_screen.dart` - Confirmación con número de orden
-
-### 4. Agregar Rutas Faltantes
-
-En `lib/shared/navigation/app_router.dart`, agregar:
-```dart
-GoRoute(
-  path: '/plan-selection',
-  name: 'plan-selection',
-  builder: (context, state) => PlanSelectionScreen(
-    registrationData: state.extra as RegistrationData?,
-  ),
-),
-GoRoute(
-  path: '/payment-checkout',
-  name: 'payment-checkout',
-  builder: (context, state) => PaymentCheckoutScreen(
-    plan: (state.extra as Map)['plan'] as InsurancePlan,
-    registrationData: (state.extra as Map)['registrationData'] as RegistrationData,
-  ),
-),
-GoRoute(
-  path: '/payment-success',
-  name: 'payment-success',
-  builder: (context, state) => PaymentSuccessScreen(
-    paymentDetails: state.extra as PaymentDetails,
-  ),
-),
-```
+- Definir contratos de API
+- Implementar servicios HTTP
+- Manejar autenticación con tokens
 
 ---
 
@@ -177,15 +137,27 @@ GoRoute(
 
 Para verificar todo el flujo:
 
+**Flujo de Registro:**
 1. Abrir app → tap "Regístrate" en LoginScreen
 2. Completar formulario Personal Info → verificar validaciones
 3. Completar Contact Info → verificar email/teléfono
 4. Completar Address Info → verificar dropdown de estados
-5. Crear PIN → verificar match validation (el error de dispose está resuelto)
-6. ⏳ Ver planes → seleccionar plan estándar
-7. ⏳ Revisar checkout → marcar términos → procesar pago
-8. ⏳ Ver confirmación → ir al inicio
-9. ⏳ Verificar HomePage muestra plan activo
+5. Crear PIN → verificar match validation
+
+**Flujo de Pago:**
+6. Ver planes → seleccionar plan (Básico/Estándar/Premium)
+7. Revisar checkout → marcar términos → procesar pago
+8. Ver confirmación → ir al inicio
+9. Verificar HomePage muestra plan activo
+
+**Flujo de Farmacia:**
+10. Home → Farmacia → agregar productos
+11. Checkout → seleccionar método de pago
+12. Procesar pago → ver confirmación
+
+**Flujo de QR:**
+13. Home → tap en carnet de seguro → ver detalles
+14. Escanear QR → ver resultado
 
 ---
 
