@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/constants/app_constants.dart';
@@ -46,13 +47,16 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: AppColors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppConstants.spacingLg),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppConstants.spacingLg,
+            vertical: AppConstants.spacingMd,
+          ),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: AppConstants.spacingXxl),
+                const SizedBox(height: AppConstants.spacingXl),
 
                 // Logo y título
                 _buildHeader(),
@@ -63,6 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text(
                   'Bienvenido',
                   style: AppTextStyles.h2,
+                  textAlign: TextAlign.left,
                 ),
                 const SizedBox(height: AppConstants.spacingXs),
                 Text(
@@ -70,6 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.textSecondary,
                   ),
+                  textAlign: TextAlign.left,
                 ),
 
                 const SizedBox(height: AppConstants.spacingXl),
@@ -91,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   isLoading: _isLoading,
                 ),
 
-                const SizedBox(height: AppConstants.spacingLg),
+                const SizedBox(height: AppConstants.spacingXl),
 
                 // Link de registro
                 Center(
@@ -119,10 +125,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
 
-                const SizedBox(height: AppConstants.spacingLg),
+                const SizedBox(height: AppConstants.spacingXl),
 
                 // Términos y condiciones
                 _buildTermsText(),
+
+                const SizedBox(height: AppConstants.spacingMd),
               ],
             ),
           ),
@@ -133,10 +141,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildHeader() {
     return Center(
-      child: Image.asset(
-        'assets/images/seguramiga_logo.jpeg',
-        width: 250,
-        fit: BoxFit.contain,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingMd),
+        child: SvgPicture.asset(
+          'assets/images/logo_horizontal_clean.svg',
+          width: 260,
+          height: 80,
+          fit: BoxFit.contain,
+          alignment: Alignment.center,
+        ),
       ),
     );
   }

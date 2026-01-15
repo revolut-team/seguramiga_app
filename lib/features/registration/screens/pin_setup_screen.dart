@@ -32,19 +32,23 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
   bool _isPinComplete = false;
   bool _isConfirmPinComplete = false;
   bool _isLoading = false;
+  bool _isNavigating = false;
   String? _errorMessage;
 
   @override
   void dispose() {
-    _pinController.dispose();
-    _confirmPinController.dispose();
+    // Limpiar los controladores de forma segura
+    try {
+      _pinController.dispose();
+    } catch (e) {
+      // Ignorar errores de dispose
+    }
+    try {
+      _confirmPinController.dispose();
+    } catch (e) {
+      // Ignorar errores de dispose
+    }
     super.dispose();
-  }
-
-  @override
-  void deactivate() {
-    // Prevenir errores al cambiar de ruta
-    super.deactivate();
   }
 
   bool _isWeakPin(String pin) {
@@ -111,16 +115,20 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
     if (!mounted) return;
     setState(() {
       _isLoading = true;
+      _isNavigating = true;
     });
+
+    // Limpiar los controladores antes de navegar
+    _pinController.clear();
+    _confirmPinController.clear();
 
     // Simular guardado en servidor
     await Future.delayed(const Duration(seconds: 2));
 
-    if (!mounted) return;
-
-    // Navegar a selección de plan (sin setState después de navegar)
+    // Navegar a selección de plan (verificar mounted antes de navegar)
     if (mounted) {
-      context.go('/plan-selection', extra: updatedData);
+      // Usar pushReplacement para evitar problemas con el back button
+      context.pushReplacement('/plan-selection', extra: updatedData);
     }
   }
 
@@ -203,6 +211,7 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
                     obscuringCharacter: '●',
                     keyboardType: TextInputType.number,
                     animationType: AnimationType.fade,
+                    enabled: !_isNavigating,
                     pinTheme: PinTheme(
                       shape: PinCodeFieldShape.box,
                       borderRadius: BorderRadius.circular(AppConstants.radiusMd),
@@ -217,11 +226,13 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
                     ),
                     enableActiveFill: true,
                     onChanged: (value) {
-                      setState(() {
-                        _pin = value;
-                        _isPinComplete = value.length == 4;
-                        _errorMessage = null;
-                      });
+                      if (mounted && !_isNavigating) {
+                        setState(() {
+                          _pin = value;
+                          _isPinComplete = value.length == 4;
+                          _errorMessage = null;
+                        });
+                      }
                     },
                   ),
                   const SizedBox(height: AppConstants.spacingXl),
@@ -242,6 +253,7 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
                     obscuringCharacter: '●',
                     keyboardType: TextInputType.number,
                     animationType: AnimationType.fade,
+                    enabled: !_isNavigating,
                     pinTheme: PinTheme(
                       shape: PinCodeFieldShape.box,
                       borderRadius: BorderRadius.circular(AppConstants.radiusMd),
@@ -256,11 +268,13 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
                     ),
                     enableActiveFill: true,
                     onChanged: (value) {
-                      setState(() {
-                        _confirmPin = value;
-                        _isConfirmPinComplete = value.length == 4;
-                        _errorMessage = null;
-                      });
+                      if (mounted && !_isNavigating) {
+                        setState(() {
+                          _confirmPin = value;
+                          _isConfirmPinComplete = value.length == 4;
+                          _errorMessage = null;
+                        });
+                      }
                     },
                   ),
 

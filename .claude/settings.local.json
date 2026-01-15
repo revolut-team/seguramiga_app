@@ -5,7 +5,9 @@
       "Bash(gh:*)",
       "Bash(/usr/bin/git branch:*)",
       "Bash(brew install:*)",
-      "Bash(flutter analyze:*)"
+      "Bash(flutter analyze:*)",
+      "Bash(dart run:*)",
+      "Bash(ls:*)"
     ]
   }
 }
