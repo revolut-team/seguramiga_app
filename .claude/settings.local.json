@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(gh:*)",
+      "Bash(/usr/bin/git branch:*)",
+      "Bash(brew install:*)",
+      "Bash(flutter analyze:*)"
     ]
   }
 }

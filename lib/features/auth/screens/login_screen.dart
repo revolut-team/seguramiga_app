@@ -93,6 +93,34 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: AppConstants.spacingLg),
 
+                // Link de registro
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      context.push('/register/personal');
+                    },
+                    child: RichText(
+                      text: TextSpan(
+                        text: '¿No tienes cuenta? ',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: 'Regístrate',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: AppConstants.spacingLg),
+
                 // Términos y condiciones
                 _buildTermsText(),
               ],

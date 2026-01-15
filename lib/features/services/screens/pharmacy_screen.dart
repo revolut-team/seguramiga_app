@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -98,6 +99,28 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
     setState(() {
       _cartItems.clear();
     });
+  }
+
+  void _proceedToPayment(BuildContext context) {
+    // Convertir cartItems a formato serializable para pasar por router
+    final cartItemsData = _cartItems.values.map((item) {
+      return {
+        'id': item.id,
+        'name': item.name,
+        'description': item.description,
+        'price': item.price,
+        'quantity': item.quantity,
+        'imageUrl': item.imageUrl,
+      };
+    }).toList();
+
+    context.push(
+      '/pharmacy/payment-methods',
+      extra: {
+        'totalAmount': _cartTotal,
+        'cartItems': cartItemsData,
+      },
+    );
   }
 
   @override
@@ -525,7 +548,12 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                       const SizedBox(height: AppConstants.spacingMd),
                       CustomButton(
                         text: 'Proceder al pago',
-                        onPressed: _cartItems.isEmpty ? null : () {},
+                        onPressed: _cartItems.isEmpty
+                            ? null
+                            : () {
+                                Navigator.of(context).pop();
+                                _proceedToPayment(context);
+                              },
                         isFullWidth: true,
                       ),
                     ],

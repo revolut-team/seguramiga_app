@@ -4,10 +4,20 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/pin_screen.dart';
 import '../../features/auth/screens/recover_pin_screen.dart';
+import '../../features/registration/screens/personal_info_screen.dart';
+import '../../features/registration/screens/contact_info_screen.dart';
+import '../../features/registration/screens/address_info_screen.dart';
+import '../../features/registration/screens/pin_setup_screen.dart';
+import '../../features/registration/screens/plan_selection_screen.dart';
+import '../../features/registration/screens/payment_checkout_screen.dart';
+import '../../features/registration/screens/payment_success_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/services/screens/telemedicine_screen.dart';
 import '../../features/services/screens/pharmacy_screen.dart';
+import '../../features/services/screens/pharmacy_payment_methods_screen.dart';
+import '../../features/services/screens/pharmacy_payment_process_screen.dart';
+import '../../features/services/screens/pharmacy_payment_success_screen.dart';
 import '../../features/services/screens/appointments_screen.dart';
 import '../../features/services/screens/directory_screen.dart';
 import '../../features/services/screens/exams_screen.dart';
@@ -20,6 +30,9 @@ import '../../features/benefits/screens/benefits_screen.dart';
 import '../../features/insurance/screens/insurance_details_screen.dart';
 import '../../features/insurance/screens/qr_scanner_screen.dart';
 import '../../features/insurance/screens/qr_scan_result_screen.dart';
+import '../../shared/models/registration_data_model.dart';
+import '../../shared/models/insurance_plan_model.dart';
+import '../../shared/models/payment_details_model.dart';
 import '../widgets/main_shell.dart';
 
 /// Configuración del router de la aplicación
@@ -45,6 +58,63 @@ class AppRouter {
       GoRoute(
         path: '/recover-pin',
         builder: (context, state) => const RecoverPinScreen(),
+      ),
+
+      // Rutas de registro (sin shell)
+      GoRoute(
+        path: '/register/personal',
+        builder: (context, state) => const PersonalInfoScreen(),
+      ),
+      GoRoute(
+        path: '/register/contact',
+        builder: (context, state) {
+          final registrationData = state.extra as RegistrationData;
+          return ContactInfoScreen(registrationData: registrationData);
+        },
+      ),
+      GoRoute(
+        path: '/register/address',
+        builder: (context, state) {
+          final registrationData = state.extra as RegistrationData;
+          return AddressInfoScreen(registrationData: registrationData);
+        },
+      ),
+      GoRoute(
+        path: '/register/pin-setup',
+        builder: (context, state) {
+          final registrationData = state.extra as RegistrationData;
+          return PinSetupScreen(registrationData: registrationData);
+        },
+      ),
+
+      // Rutas de selección de plan y pago (sin shell)
+      GoRoute(
+        path: '/plan-selection',
+        builder: (context, state) {
+          final registrationData = state.extra as RegistrationData?;
+          return PlanSelectionScreen(registrationData: registrationData);
+        },
+      ),
+      GoRoute(
+        path: '/payment-checkout',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return PaymentCheckoutScreen(
+            plan: extra['plan'] as InsurancePlan,
+            isAnnual: extra['isAnnual'] as bool,
+            registrationData: extra['registrationData'] as RegistrationData?,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/payment-success',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return PaymentSuccessScreen(
+            paymentDetails: extra['paymentDetails'] as PaymentDetails,
+            registrationData: extra['registrationData'] as RegistrationData?,
+          );
+        },
       ),
 
       // Shell con navegación inferior
@@ -94,6 +164,39 @@ class AppRouter {
       GoRoute(
         path: '/pharmacy',
         builder: (context, state) => const PharmacyScreen(),
+      ),
+      GoRoute(
+        path: '/pharmacy/payment-methods',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return PharmacyPaymentMethodsScreen(
+            totalAmount: extra['totalAmount'] as double,
+            cartItems: extra['cartItems'] as List<Map<String, dynamic>>,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/pharmacy/payment-process',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return PharmacyPaymentProcessScreen(
+            paymentMethod: extra['paymentMethod'] as PaymentMethod,
+            totalAmount: extra['totalAmount'] as double,
+            cartItems: extra['cartItems'] as List<Map<String, dynamic>>,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/pharmacy/payment-success',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return PharmacyPaymentSuccessScreen(
+            orderId: extra['orderId'] as String,
+            reference: extra['reference'] as String,
+            totalAmount: extra['totalAmount'] as double,
+            paymentMethod: extra['paymentMethod'] as String,
+          );
+        },
       ),
       GoRoute(
         path: '/appointments',
